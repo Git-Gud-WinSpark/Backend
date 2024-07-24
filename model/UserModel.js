@@ -25,13 +25,9 @@ const UserSchema = new mongoose.Schema(
         preferences: {
             type: [String]
         },
-        comminityIDs:
-            [
-                {
-                    type: String,
-                    unique: true
-                }
-            ]
+        comminityIDs:{
+            type: [String]
+        }
     }
 )
 

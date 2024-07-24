@@ -4,6 +4,7 @@ const Community = require('../model/CommunityModel'); // Adjust the path as need
 const ChatModel = require('../model/ChatsModel');
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = "Git-Gud";
+const UserModel = require('../model/UserModel');
 
 
 router.post('/createCommunity', async (req, res) => {
@@ -109,10 +110,38 @@ router.post('/getChannels', async (req, res) => {
 
 router.post('/getChats', async (req, res) => {
     try {
+        const chats = await ChatModel.find({receiverID: req.body.receiverID});
         
-        const chats = ChatModel.find({receiverID: req.body.receiverID});
-        console.log(chats);
-        
+        return res.status(200).json({
+            status: "Success",
+            chat: chats
+        })
+    }
+    catch (e) {
+        return res.status(500).json({
+            status: "failed",
+            message: e.message
+        })
+    }
+})
+
+
+router.post('/addCommunity', async (req, res) => {
+    try {
+        var userID;
+        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
+            if (err) {
+                throw Error('Token problem');
+            }
+            userID = payload;
+        });
+
+        await UserModel.findOneAndUpdate(
+            { _id: userID }, // Filter
+            { $push: { comminityIDs: req.body.communityID } }, // Update
+            { new: true } // Options: return the updated document
+        );
+
         return res.status(200).json({
             status: "Success"
         })
@@ -124,5 +153,7 @@ router.post('/getChats', async (req, res) => {
         })
     }
 })
+
+
 
 module.exports = router;
