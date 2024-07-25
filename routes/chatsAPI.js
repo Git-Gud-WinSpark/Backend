@@ -180,6 +180,21 @@ router.post('/addCommunity', async (req, res) => {
 })
 
 
+router.get('/listAllCommunity', async (req, res) => {
+    try {
+        const allCommunities = await Community.find({}, ['_id', 'communityName']);
+        return res.status(200).json({
+            status: "Success",
+            ListofAllCommunities: allCommunities
+        })
+    }
+    catch (e) {
+        return res.status(500).json({
+            status: "failed",
+            message: e.message
+        })
+    }
+})
 
 
 module.exports = router;
