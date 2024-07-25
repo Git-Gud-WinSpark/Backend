@@ -196,5 +196,35 @@ router.get('/listAllCommunity', async (req, res) => {
     }
 })
 
+router.post('/listUserCommunity', async (req, res) => {
+    try {
+        var userID;
+        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
+            if (err) {
+                throw Error('Token problem');
+            }
+            userID = payload;
+        });
+        const userData = await UserModel.findById(userID);
+        const userCommunities = [];
+        const promises = userData.comminityIDs.map(async (commID) => {
+            const comm = await Community.findById(commID);
+            userCommunities.push(comm);
+        });
+        await Promise.all(promises);
+
+        return res.status(200).json({
+            status: "Success",
+            CommunitiesJoinedByUser: userCommunities
+        })
+    }
+    catch (e) {
+        return res.status(500).json({
+            status: "failed",
+            message: e.message
+        })
+    }
+})
+
 
 module.exports = router;
