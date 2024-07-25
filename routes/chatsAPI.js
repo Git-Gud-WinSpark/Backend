@@ -8,20 +8,45 @@ const UserModel = require('../model/UserModel');
 
 
 router.post('/createCommunity', async (req, res) => {
+    var comminityID;
     try {
-        await Community.create({
-            communityName: req.body.communityName
-        });
+        const newCommunity = new Community({ communityName: req.body.communityName });
 
-        return res.status(200).json({
+        await newCommunity.save();  // Await the promise to ensure it resolves before sending a response
+        comminityID = newCommunity._id;
+    } catch (err) {
+        // Check for duplicate key error (MongoDB error code for duplicate keys is 11000)
+        if (err.code === 11000) {
+            return res.status(400).json({
+                status: "failed",
+                message: "Duplicate community name"
+            });
+        }
+    }
+
+    try {
+        var userID;
+        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
+            if (err) {
+                throw Error('Token problem');
+            }
+            userID = payload;
+        });
+        comminityID = comminityID.toHexString();
+        await UserModel.findOneAndUpdate(
+            { _id: userID }, // Filter
+            { $push: { comminityIDs: comminityID } }, // Update
+            { new: true } // Options: return the updated document
+        );
+        return res.status(500).json({
             status: "Success",
-            message: "Created Community"
+            message: "Community created and added in user collection"
         })
     }
-    catch (e) {
+    catch (err) {
         return res.status(500).json({
             status: "failed",
-            message: e.message
+            message: err.message
         })
     }
 });
@@ -110,8 +135,8 @@ router.post('/getChannels', async (req, res) => {
 
 router.post('/getChats', async (req, res) => {
     try {
-        const chats = await ChatModel.find({receiverID: req.body.receiverID});
-        
+        const chats = await ChatModel.find({ receiverID: req.body.receiverID });
+
         return res.status(200).json({
             status: "Success",
             chat: chats
@@ -153,6 +178,7 @@ router.post('/addCommunity', async (req, res) => {
         })
     }
 })
+
 
 
 

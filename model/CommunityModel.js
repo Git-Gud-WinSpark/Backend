@@ -9,11 +9,19 @@ const channelSchema = new Schema({
 
 // Define the Community schema
 const communitySchema = new Schema({
-    communityName: String,
+    communityName: {
+        type: String,
+        required: true,
+        unique: true
+    },
     channels: [channelSchema]
 });
 
 // Create the Community model
 const Community = mongoose.model('Community', communitySchema);
-
+Community.init().then(() => {
+    console.log('Indexes are created');
+}).catch(err => {
+    console.error('Error creating indexes', err);
+});
 module.exports = Community;
