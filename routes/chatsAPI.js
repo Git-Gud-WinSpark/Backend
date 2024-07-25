@@ -38,9 +38,10 @@ router.post('/createCommunity', async (req, res) => {
             { $push: { comminityIDs: comminityID } }, // Update
             { new: true } // Options: return the updated document
         );
-        return res.status(500).json({
+        return res.status(200).json({
             status: "Success",
-            message: "Community created and added in user collection"
+            message: "Community created and added in user collection",
+            communityID: comminityID
         })
     }
     catch (err) {
