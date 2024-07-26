@@ -10,11 +10,11 @@ const P2PChatModel = require('../model/P2PChatModel');
 router.post('/createCommunity', async (req, res) => {
     var communityID;
     try {
-        const newCommunity = new Community({ 
+        const newCommunity = new Community({
             communityName: req.body.communityName,
-            tag: req.body.tags 
+            tag: req.body.tags
         });
-        
+
         await newCommunity.save();  // Await the promise to ensure it resolves before sending a response
         communityID = newCommunity._id;
     } catch (err) {
@@ -277,16 +277,36 @@ router.post('/listP2PConversations', async (req, res) => {
         });
 
         const allConversations = await P2PChatModel.aggregate([
-            { $match: { receiverID: userID } },               
-            { $group: { _id: "$senderID" } },                 
-          ]);
+            {
+                $match: {
+                    $or: [
+                        { receiverID: userID },
+                        { senderID: userID }
+                    ]
+                }
+            },
+            { $group: { _id: "$senderID" } },
+        ]);
 
-        console.log(allConversations);
+        const conversations = [];
+
+        allConversations.forEach(element => {
+            if (element._id != userID) {
+                conversations.push(element);
+            }
+        })
+        const ReceiverNames = [];
+        const promises = conversations.map(async (element) => {
+            const name = await UserModel.findById(element._id, ['username', 'profilePicture']);
+            ReceiverNames.push(name);
+        })
+
+        await Promise.all(promises);
 
         return res.status(200).json({
             status: "Success",
             message: "Chat saved",
-            conversation: allConversations
+            conversation: ReceiverNames
         })
     }
     catch (e) {
@@ -298,19 +318,27 @@ router.post('/listP2PConversations', async (req, res) => {
 });
 
 router.post('/getP2PChats', async (req, res) => {
-    try {
-        var userID;
-        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
-            if (err) {
-                return res.status(404).json({
-                    status: "failed",
-                    message: err.message
-                })
-            }
-            userID = payload;
-        });
 
-        const chats = await P2PChatModel.find({ receiverID: userID });
+    var userID;
+    try {
+        const payload = await jwt.verify(req.body.token, SECRET_KEY);
+        userID = payload;
+    } catch (err) {
+        return res.status(404).json({
+            status: "failed",
+            message: err.message
+        });
+    }
+
+    try {
+        const chats = await P2PChatModel.find({
+            $or: [
+                { $and: [{ senderID: userID }, { receiverID: req.body.receiverID }] },
+                { $and: [{ senderID: req.body.receiverID }, { receiverID: userID }] }
+            ]
+        }).sort({ timestamp: 1 });;
+
+        console.log(chats);
 
         return res.status(200).json({
             status: "Success",
