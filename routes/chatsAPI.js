@@ -5,10 +5,10 @@ const ChatModel = require('../model/ChatsModel');
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = "Git-Gud";
 const UserModel = require('../model/UserModel');
-
+const P2PChatModel = require('../model/P2PChatModel');
 
 router.post('/createCommunity', async (req, res) => {
-    var comminityID;
+    var communityID;
     try {
         const newCommunity = new Community({ 
             communityName: req.body.communityName,
@@ -16,7 +16,7 @@ router.post('/createCommunity', async (req, res) => {
         });
         
         await newCommunity.save();  // Await the promise to ensure it resolves before sending a response
-        comminityID = newCommunity._id;
+        communityID = newCommunity._id;
     } catch (err) {
         // Check for duplicate key error (MongoDB error code for duplicate keys is 11000)
         if (err.code === 11000) {
@@ -35,16 +35,16 @@ router.post('/createCommunity', async (req, res) => {
             }
             userID = payload;
         });
-        comminityID = comminityID.toHexString();
+        communityID = communityID.toHexString();
         await UserModel.findOneAndUpdate(
             { _id: userID }, // Filter
-            { $push: { comminityIDs: comminityID } }, // Update
+            { $push: { communityIDs: communityID } }, // Update
             { new: true } // Options: return the updated document
         );
         return res.status(200).json({
             status: "Success",
             message: "Community created and added in user collection",
-            communityID: comminityID
+            communityID: communityID
         })
     }
     catch (err) {
@@ -167,7 +167,7 @@ router.post('/addCommunity', async (req, res) => {
 
         await UserModel.findOneAndUpdate(
             { _id: userID }, // Filter
-            { $push: { comminityIDs: req.body.communityID } }, // Update
+            { $push: { communityIDs: req.body.communityID } }, // Update
             { new: true } // Options: return the updated document
         );
 
@@ -211,7 +211,7 @@ router.post('/listUserCommunity', async (req, res) => {
         });
         const userData = await UserModel.findById(userID);
         const userCommunities = [];
-        const promises = userData.comminityIDs.map(async (commID) => {
+        const promises = userData.communityIDs.map(async (commID) => {
             const comm = await Community.findById(commID);
             userCommunities.push(comm);
         });
@@ -220,6 +220,101 @@ router.post('/listUserCommunity', async (req, res) => {
         return res.status(200).json({
             status: "Success",
             CommunitiesJoinedByUser: userCommunities
+        })
+    }
+    catch (e) {
+        return res.status(500).json({
+            status: "failed",
+            message: e.message
+        })
+    }
+})
+
+
+router.post('/p2pChat', async (req, res) => {
+    try {
+        var userID;
+        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
+            if (err) {
+                return res.status(404).json({
+                    status: "failed",
+                    message: err.message
+                })
+            }
+            userID = payload;
+        });
+
+        await P2PChatModel.create({
+            senderID: userID,
+            receiverID: req.body.receiverID,
+            message: req.body.message
+        });
+
+        return res.status(200).json({
+            status: "Success",
+            message: "Chat saved"
+        })
+    }
+    catch (e) {
+        return res.status(500).json({
+            status: "failed",
+            message: e.message
+        })
+    }
+});
+
+router.post('/listP2PConversations', async (req, res) => {
+    try {
+        var userID;
+        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
+            if (err) {
+                return res.status(404).json({
+                    status: "failed",
+                    message: err.message
+                })
+            }
+            userID = payload;
+        });
+
+        const allConversations = await P2PChatModel.aggregate([
+            { $match: { receiverID: userID } },               
+            { $group: { _id: "$senderID" } },                 
+          ]);
+
+        console.log(allConversations);
+
+        return res.status(200).json({
+            status: "Success",
+            message: "Chat saved",
+            conversation: allConversations
+        })
+    }
+    catch (e) {
+        return res.status(500).json({
+            status: "failed",
+            message: e.message
+        })
+    }
+});
+
+router.post('/getP2PChats', async (req, res) => {
+    try {
+        var userID;
+        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
+            if (err) {
+                return res.status(404).json({
+                    status: "failed",
+                    message: err.message
+                })
+            }
+            userID = payload;
+        });
+
+        const chats = await P2PChatModel.find({ receiverID: userID });
+
+        return res.status(200).json({
+            status: "Success",
+            chat: chats
         })
     }
     catch (e) {

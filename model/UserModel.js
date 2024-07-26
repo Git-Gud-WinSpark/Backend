@@ -25,7 +25,7 @@ const UserSchema = new mongoose.Schema(
         preferences: {
             type: [String]
         },
-        comminityIDs:{
+        communityIDs:{
             type: [String]
         }
     }
