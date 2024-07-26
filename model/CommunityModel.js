@@ -4,7 +4,10 @@ const Schema = mongoose.Schema;
 // Define the Channel sub-schema
 const channelSchema = new Schema({
     channelId: { type: Schema.Types.ObjectId},
-    channelName: String
+    channelName: String,
+    profilePicture: {
+        type: String,
+    },
 });
 
 // Define the Community schema
@@ -13,6 +16,12 @@ const communitySchema = new Schema({
         type: String,
         required: true,
         unique: true
+    },
+    profilePicture: {
+        type: String,
+    },
+    tag: {
+        type: [String]
     },
     channels: [channelSchema]
 });
