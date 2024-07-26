@@ -28,7 +28,7 @@ io.on("connection", (socket) => {
     socket.on("signin",(id)=>{
         console.log("user id : ",id);
         clients[id] = socket;
-        console.log(clients)
+        console.log(id," joined")
         // console.log(Object.keys(clients).length);
     })
     //p2p message feature {issue : works only when both users are logged in}
@@ -36,8 +36,10 @@ io.on("connection", (socket) => {
         console.log(msg);
         let targetID = msg.targetID;
         // console.log(targetID,clients[targetID]);
-        if(clients[targetID])
-            clients[targetID].emit("messagep2p",msg);
+        // if(clients[targetID])
+        //     clients[targetID].emit("messagep2p",msg);
+
+        socket.broadcast.emit("messagep2p",{message: msg.msg, id:msg.id, comm_id:msg.comm_id, channel_id:msg.channel_id});
     })
  
 });
