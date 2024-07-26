@@ -338,8 +338,6 @@ router.post('/getP2PChats', async (req, res) => {
             ]
         }).sort({ timestamp: 1 });;
 
-        console.log(chats);
-
         return res.status(200).json({
             status: "Success",
             chat: chats
