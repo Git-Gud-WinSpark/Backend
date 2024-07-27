@@ -41,10 +41,13 @@ router.post('/createCommunity', async (req, res) => {
             { $push: { communityIDs: communityID } }, // Update
             { new: true } // Options: return the updated document
         );
+        const allCommunities = await Community.find({}, ['_id', 'communityName', 'tag']);
+        
         return res.status(200).json({
             status: "Success",
             message: "Community created and added in user collection",
-            communityID: communityID
+            communityID: communityID,
+            ListofAllCommunities: allCommunities
         })
     }
     catch (err) {
@@ -171,8 +174,15 @@ router.post('/addCommunity', async (req, res) => {
             { new: true } // Options: return the updated document
         );
 
+        const community = await Community.findById(req.body.communityID);
+        const Channels = [];
+        community.channels.forEach(element => {
+            Channels.push(element);
+        });
         return res.status(200).json({
-            status: "Success"
+            status: "Success",
+            CommunityName: community.communityName,
+            Channels: Channels
         })
     }
     catch (e) {
