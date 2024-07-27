@@ -25,9 +25,12 @@ const UserSchema = new mongoose.Schema(
         preferences: {
             type: [String]
         },
-        communityIDs:{
-            type: [String]
-        }
+        communityIDs: [
+            {
+                type: String,
+                unique: true
+            }
+        ]
     }
 )
 

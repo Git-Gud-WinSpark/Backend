@@ -174,8 +174,15 @@ router.post('/addCommunity', async (req, res) => {
             { new: true } // Options: return the updated document
         );
 
+        const community = await Community.findById(req.body.communityID);
+        const Channels = [];
+        community.channels.forEach(element => {
+            Channels.push(element);
+        });
         return res.status(200).json({
-            status: "Success"
+            status: "Success",
+            CommunityName: community.communityName,
+            Channels: Channels
         })
     }
     catch (e) {
