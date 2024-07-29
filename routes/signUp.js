@@ -19,6 +19,11 @@ function validatePassword(password) {
 }
 
 router.post('/', async (req, res) => {
+    // async function listIndexes() {
+    //     await UserModel.collection.dropIndex('comminityIDs_1');
+    // }
+    
+    // listIndexes();
     try {
         if (validateEmail(req.body.email)) {
             if (validatePassword(req.body.password)) {
