@@ -61,7 +61,7 @@ router.post('/createCommunity', async (req, res) => {
 
 router.post('/createChannel', async (req, res) => {
     try {
-        await Community.findOneAndUpdate(
+        const Channel = await Community.findOneAndUpdate(
             { _id: req.body.communityID }, // Filter
             {
                 $push: {
@@ -75,7 +75,8 @@ router.post('/createChannel', async (req, res) => {
 
         return res.status(200).json({
             status: "Success",
-            message: "Created Channel"
+            message: "Created Channel",
+            channelID: Channel._id
         })
     }
     catch (e) {
@@ -141,7 +142,7 @@ router.post('/getChannels', async (req, res) => {
 })
 
 router.post('/getChats', async (req, res) => {
-    try {
+    try {        
         const chats = await ChatModel.find({ receiverID: req.body.receiverID });
 
         return res.status(200).json({
@@ -361,5 +362,22 @@ router.post('/getP2PChats', async (req, res) => {
     }
 })
 
+
+router.post('/fetchUser', async (req, res) => {
+    try {        
+        const User = await UserModel.findById(req.body.userID);
+
+        return res.status(200).json({
+            status: "Success",
+            UserDetails: User
+        })
+    }
+    catch (e) {
+        return res.status(500).json({
+            status: "failed",
+            message: e.message
+        })
+    }
+})
 
 module.exports = router;
