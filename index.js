@@ -13,6 +13,8 @@ const SignInRouter = require('./routes/signIn');
 const mongoSanitize = require('express-mongo-sanitize');
 const ChatsRouter = require('./routes/chatsAPI');
 const addPreferenceRouter = require('./routes/addPreference');
+const progressRouter = require('./routes/progressTrack');
+const P2PChatModel = require('./model/P2PChatModel');
 var io = require("socket.io")(server, {
     cors: {
         origin: "*"
@@ -28,17 +30,30 @@ app.use(express.json());
 var clients = {};
 
 
-async function storeChats(userID, receiverID, message, communityID)
+async function storeP2CChats(userID, receiverID, communityID,message)
 {
     try {
-        console.log(userID);
-        console.log(receiverID);
-        console.log(message);
-        console.log(communityID);
+    
         await ChatModel.create({
             senderID: userID,
             receiverID: receiverID,
             communityID: communityID,
+            message: message
+        });
+        console.log("Chat Stored");
+    }
+    catch (e) {
+        console.log(e.message);
+    }
+}
+
+async function storeP2PChats(userID, receiverID, message, communityID)
+{
+    try {
+    
+        await P2PChatModel.create({
+            senderID: userID,
+            receiverID: receiverID,
             message: message
         });
         console.log("Chat Stored");
@@ -67,15 +82,18 @@ io.on("connection", (socket) => {
         // if(clients[targetID])
         //     clients[targetID].emit("messagep2p",msg);
         console.log("id:",msg.id)
-        storeChats(msg.id, msg.channel_id, msg.comm_id, msg.msg);
+        storeP2CChats(msg.id, msg.channel_id, msg.comm_id, msg.msg);
         socket.broadcast.emit("messagep2c",{message: msg.msg, id:msg.id, comm_id:msg.comm_id, channel_id:msg.channel_id});
     })
     
     socket.on("messagep2p",(msg) =>{
         console.log(msg,"p2p message");
         let targetID = msg.targetID;
+        storeP2PChats(msg.id, msg.targetID, msg.msg);
         if(clients[targetID])
+        {
             clients[targetID].emit("messagep2p",msg);
+        }
     })
  
 });
@@ -91,6 +109,7 @@ app.use('/signup', SignUpRouter);
 app.use('/signin', SignInRouter);
 app.use('/api', ChatsRouter);
 app.use('/addPreference', addPreferenceRouter);
+app.use('/progressTrack', progressRouter);
 
 app.get('/', async (req, res) => {
     return res.send('Ok');
