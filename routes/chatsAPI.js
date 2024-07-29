@@ -61,7 +61,7 @@ router.post('/createCommunity', async (req, res) => {
 
 router.post('/createChannel', async (req, res) => {
     try {
-        await Community.findOneAndUpdate(
+        const Channel = await Community.findOneAndUpdate(
             { _id: req.body.communityID }, // Filter
             {
                 $push: {
@@ -75,7 +75,8 @@ router.post('/createChannel', async (req, res) => {
 
         return res.status(200).json({
             status: "Success",
-            message: "Created Channel"
+            message: "Created Channel",
+            channelID: Channel._id
         })
     }
     catch (e) {
