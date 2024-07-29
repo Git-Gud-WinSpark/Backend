@@ -12,6 +12,7 @@ router.post('/createCommunity', async (req, res) => {
     try {
         const newCommunity = new Community({
             communityName: req.body.communityName,
+            profilePicture: req.body.profilePicture,
             tag: req.body.tags
         });
 
