@@ -10,6 +10,7 @@ const SubtaskSchema = new mongoose.Schema({
 const LiveTaskSchema = new mongoose.Schema({
     name: { type: String, required: true, unique: true },
     status: { type: Boolean, default: false },
+    completionTime: {type : Date},
     subtask: [SubtaskSchema]
 });
 

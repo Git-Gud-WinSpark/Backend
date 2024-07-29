@@ -72,11 +72,12 @@ router.post('/createChannel', async (req, res) => {
             }, // Update
             { new: true } // Options: return the updated document
         );
+        const length = Channel.channels.length;
 
         return res.status(200).json({
             status: "Success",
             message: "Created Channel",
-            channelID: Channel._id
+            channelID: Channel.channels[length-1]._id
         })
     }
     catch (e) {
