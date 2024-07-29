@@ -10,8 +10,6 @@ var io = require("socket.io")(server, {
     },
 })
 
-// to-be added features : 
-// 1. group messaging messaging
 // 2. offline messaging
 // 3. file sharing
 
@@ -32,14 +30,20 @@ io.on("connection", (socket) => {
         // console.log(Object.keys(clients).length);
     })
     //p2p message feature {issue : works only when both users are logged in}
-    socket.on("messagep2p",(msg)=>{
+    socket.on("messagep2c",(msg)=>{
         console.log(msg);
         let targetID = msg.targetID;
         // console.log(targetID,clients[targetID]);
         // if(clients[targetID])
         //     clients[targetID].emit("messagep2p",msg);
-
-        socket.broadcast.emit("messagep2p",{message: msg.msg, id:msg.id, comm_id:msg.comm_id, channel_id:msg.channel_id});
+        socket.broadcast.emit("messagep2c",{message: msg.msg, id:msg.id, comm_id:msg.comm_id, channel_id:msg.channel_id});
+    })
+    
+    socket.on("messagep2p",(msg) =>{
+        console.log(msg,"p2p message");
+        let targetID = msg.targetID;
+        if(clients[targetID])
+            clients[targetID].emit("messagep2p",msg);
     })
  
 });
