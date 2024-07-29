@@ -66,8 +66,6 @@ io.on("connection", (socket) => {
         // console.log(targetID,clients[targetID]);
         // if(clients[targetID])
         //     clients[targetID].emit("messagep2p",msg);
-        console.log("id:",msg.id)
-        storeChats(msg.id, msg.channel_id, msg.comm_id, msg.msg);
         socket.broadcast.emit("messagep2c",{message: msg.msg, id:msg.id, comm_id:msg.comm_id, channel_id:msg.channel_id});
     })
     
