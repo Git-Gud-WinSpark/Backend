@@ -14,8 +14,7 @@ const channelSchema = new Schema({
 const communitySchema = new Schema({
     communityName: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     profilePicture: {
         type: String,

@@ -15,6 +15,7 @@ const ChatsRouter = require('./routes/chatsAPI');
 const addPreferenceRouter = require('./routes/addPreference');
 const progressRouter = require('./routes/progressTrack');
 const P2PChatModel = require('./model/P2PChatModel');
+const limiter = require('./controller/rateLimit');
 var io = require("socket.io")(server, {
     cors: {
         origin: "*"
@@ -30,10 +31,9 @@ app.use(express.json());
 var clients = {};
 
 
-async function storeP2CChats(userID, receiverID, communityID,message)
-{
+async function storeP2CChats(userID, receiverID, communityID, message) {
     try {
-    
+
         await ChatModel.create({
             senderID: userID,
             receiverID: receiverID,
@@ -47,10 +47,9 @@ async function storeP2CChats(userID, receiverID, communityID,message)
     }
 }
 
-async function storeP2PChats(userID, receiverID, message, communityID)
-{
+async function storeP2PChats(userID, receiverID, message, communityID) {
     try {
-    
+
         await P2PChatModel.create({
             senderID: userID,
             receiverID: receiverID,
@@ -66,43 +65,42 @@ async function storeP2PChats(userID, receiverID, message, communityID)
 // socket driver code
 io.on("connection", (socket) => {
     console.log("User connected");
-    console.log(socket.id,"has joined");
+    console.log(socket.id, "has joined");
     //on user sign in send the user id to the socket
-    socket.on("signin",(id)=>{
-        console.log("user id : ",id);
+    socket.on("signin", (id) => {
+        console.log("user id : ", id);
         clients[id] = socket;
-        console.log(id," joined")
+        console.log(id, " joined")
         // console.log(Object.keys(clients).length);
     })
     //p2p message feature {issue : works only when both users are logged in}
-    socket.on("messagep2c",(msg)=>{
+    socket.on("messagep2c", (msg) => {
         console.log(msg);
         let targetID = msg.targetID;
         // console.log(targetID,clients[targetID]);
         // if(clients[targetID])
         //     clients[targetID].emit("messagep2p",msg);
-        console.log("id:",msg.id)
+        console.log("id:", msg.id)
         storeP2CChats(msg.id, msg.channel_id, msg.comm_id, msg.msg);
-        socket.broadcast.emit("messagep2c",{message: msg.msg, id:msg.id, comm_id:msg.comm_id, channel_id:msg.channel_id});
+        socket.broadcast.emit("messagep2c", { message: msg.msg, id: msg.id, comm_id: msg.comm_id, channel_id: msg.channel_id });
     })
-    
-    socket.on("messagep2p",(msg) =>{
-        console.log(msg,"p2p message");
+
+    socket.on("messagep2p", (msg) => {
+        console.log(msg, "p2p message");
         let targetID = msg.targetID;
         storeP2PChats(msg.id, msg.targetID, msg.msg);
-        if(clients[targetID])
-        {
-            clients[targetID].emit("messagep2p",msg);
+        if (clients[targetID]) {
+            clients[targetID].emit("messagep2p", msg);
         }
     })
- 
+
 });
 
 
-
 //Middlewares
+app.use(limiter);
 app.use(express.json());
-app.use(express.urlencoded({extended:false}));
+app.use(express.urlencoded({ extended: false }));
 app.use(mongoSanitize());
 
 app.use('/signup', SignUpRouter);

@@ -27,8 +27,7 @@ const UserSchema = new mongoose.Schema(
         },
         communityIDs: [
             {
-                type: String,
-                unique: true
+                type: String
             }
         ]
     }

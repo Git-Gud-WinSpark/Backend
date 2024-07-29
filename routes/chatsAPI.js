@@ -41,13 +41,11 @@ router.post('/createCommunity', async (req, res) => {
             { $push: { communityIDs: communityID } }, // Update
             { new: true } // Options: return the updated document
         );
-        const allCommunities = await Community.find({}, ['_id', 'communityName', 'tag']);
         
         return res.status(200).json({
             status: "Success",
             message: "Community created and added in user collection",
-            communityID: communityID,
-            ListofAllCommunities: allCommunities
+            communityID: communityID
         })
     }
     catch (err) {
