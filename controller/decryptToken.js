@@ -10,7 +10,7 @@ async function decryptJWTToken(token)
         }
         userID = payload;
     });
-    console.log(payload);
+    return userID;
 }
 
 module.exports = decryptJWTToken;

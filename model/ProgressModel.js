@@ -2,13 +2,13 @@ const mongoose = require('mongoose');
 const {Schema} = require('mongoose');
 
 const SubtaskSchema = new mongoose.Schema({
-    name: { type: String, required: true, unique: true },
+    name: { type: String, required: true},
     status: { type: Boolean, default: false },
     timeSpent: { type: Date}
 });
 
 const LiveTaskSchema = new mongoose.Schema({
-    name: { type: String, required: true, unique: true },
+    name: { type: String, required: true},
     status: { type: Boolean, default: false },
     completionTime: {type : Date},
     subtask: [SubtaskSchema]
