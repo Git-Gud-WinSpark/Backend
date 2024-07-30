@@ -117,23 +117,21 @@ router.post('/completeTask', async (req, res) => {
         var flag = false;
 
         result.liveTask.forEach(element => {
-            if (element._id == req.body.liveTaskID) 
-                {
-                    var isLiveTaskCompleted = 0;
-                    for (let i = 0; i < element.subtask.length; i++) {
-                        if (element.subtask[i]._id == req.body.subtaskID) {
-                            element.subtask[i].status = true;
-                            flag = true;
-                        }
-                        if(element.subtask[element.subtask.length - 1].status == true)
-                        {
-                            element.status = true;
-                        }
+            if (element._id == req.body.liveTaskID) {
+                var isLiveTaskCompleted = 0;
+                for (let i = 0; i < element.subtask.length; i++) {
+                    if (element.subtask[i]._id == req.body.subtaskID) {
+                        element.subtask[i].status = true;
+                        flag = true;
+                    }
+                    if (element.subtask[element.subtask.length - 1].status == true) {
+                        element.status = true;
                     }
                 }
-    });
+            }
+        });
 
-        
+
 
         await result.save();
         if (flag == true) {
@@ -167,7 +165,7 @@ router.post('/setLiveTask', async (req, res) => {
                 ]
             },
             {
-                $push: {liveTask: req.body.liveTask}
+                $push: { liveTask: req.body.liveTask }
             }
         );
 
@@ -188,19 +186,25 @@ router.post('/setSubTask', async (req, res) => {
     try {
         const userID = await decryptJWTToken(req.body.token);
 
-        const LiveTaskList = await ProgressModel.findOneAndUpdate(
+        const result = await ProgressModel.findOne(
             {
                 $and: [
                     { userID: userID },
                     { communityID: req.body.communityID },
                     { channelID: req.body.channelID },
-                    {liveTask: req.body.liveTask}
+                    { 'liveTask._id': req.body.liveTaskID }
                 ]
-            },
-            {
-                $push: {}
             }
         );
+
+        result.liveTask.forEach(element => {
+            if (element._id == req.body.liveTaskID) {
+                element.subtask.push(req.body.subTask);
+                console.log(element.subtask);
+            }
+        });
+        console.log(result.live)
+        await result.save();
 
         return res.status(200).json({
             status: "Success"
