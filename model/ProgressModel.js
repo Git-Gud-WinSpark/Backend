@@ -4,7 +4,7 @@ const {Schema} = require('mongoose');
 const SubtaskSchema = new mongoose.Schema({
     name: { type: String, required: true},
     status: { type: Boolean, default: false },
-    timeSpent: { type: Date}
+    timeSpent: { type: String}
 });
 
 const LiveTaskSchema = new mongoose.Schema({
