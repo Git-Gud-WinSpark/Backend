@@ -380,4 +380,23 @@ router.post('/fetchUser', async (req, res) => {
     }
 })
 
+router.post('/getUser', async (req, res) => {
+    try {        
+        const User = await UserModel.find({
+            username: { $regex: req.body.userName, $options: 'i' }
+        });
+
+        return res.status(200).json({
+            status: "Success",
+            UserDetails: User
+        })
+    }
+    catch (e) {
+        return res.status(500).json({
+            status: "failed",
+            message: e.message
+        })
+    }
+})
+
 module.exports = router;

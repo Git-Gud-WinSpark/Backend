@@ -26,10 +26,24 @@ router.post('/', async (req, res) => {
             else {
                 var result = await bcrypt.compare(req.body.password, foundRecord.password);
                 const preferences = foundRecord.preferences;
-        
+                const originalId = foundRecord._id.toHexString();
+                const oldfailAttemptCount = foundRecord.failAttemptCount;
+
+                if (oldfailAttemptCount >= 3) 
+                {
+                    return res.status(404).json({
+                        status: "Failed",
+                        message: "Too many attempts"
+                    })
+                }
+
                 if (result) {
-                    const originalId = foundRecord._id.toHexString();
                     const token = await jwt.sign(originalId, SECRET_KEY);
+                    await UserModel.findOneAndUpdate(
+                        { _id: originalId }, // Filter
+                        { $set: { failAttemptCount: 0 } }, // Update
+                        { new: true } // Options: return the updated document
+                    );
                     return res.status(200).json({
                         status: "Success",
                         message: "SignIp Successful",
@@ -38,6 +52,12 @@ router.post('/', async (req, res) => {
                     })
                 }
                 else {
+                    await UserModel.findOneAndUpdate(
+                        { _id: originalId }, // Filter
+                        { $set: { failAttemptCount: oldfailAttemptCount + 1 } }, // Update
+                        { new: true } // Options: return the updated document
+                    );
+
                     return res.status(404).json({
                         status: "Failed",
                         message: "Invalid Password"
