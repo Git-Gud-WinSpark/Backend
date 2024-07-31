@@ -263,7 +263,8 @@ router.post('/p2pChat', async (req, res) => {
 
         return res.status(200).json({
             status: "Success",
-            message: "Chat saved"
+            message: "Chat saved",
+            token: req.body.token
         })
     }
     catch (e) {
