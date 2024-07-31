@@ -42,7 +42,7 @@ router.post('/createCommunity', async (req, res) => {
             { $push: { communityIDs: communityID } }, // Update
             { new: true } // Options: return the updated document
         );
-        
+
         return res.status(200).json({
             status: "Success",
             message: "Community created and added in user collection",
@@ -76,7 +76,7 @@ router.post('/createChannel', async (req, res) => {
         return res.status(200).json({
             status: "Success",
             message: "Created Channel",
-            channelID: Channel.channels[length-1]._id
+            channelID: Channel.channels[length - 1]._id
         })
     }
     catch (e) {
@@ -142,7 +142,7 @@ router.post('/getChannels', async (req, res) => {
 })
 
 router.post('/getChats', async (req, res) => {
-    try {        
+    try {
         const chats = await ChatModel.find({ receiverID: req.body.receiverID });
 
         return res.status(200).json({
@@ -261,11 +261,6 @@ router.post('/p2pChat', async (req, res) => {
             message: req.body.message
         });
 
-        await P2PChatModel.create({
-            senderID: req.body.receiverID,
-            receiverID: userID
-        });
-
         return res.status(200).json({
             status: "Success",
             message: "Chat saved"
@@ -301,19 +296,35 @@ router.post('/listP2PConversations', async (req, res) => {
                     ]
                 }
             },
-            { $group: { _id: "$senderID" } },
+            {
+                $group: {
+                    _id: [
+                        "$senderID",
+                        "$receiverID"]
+                },
+            }
         ]);
         // console.log(allConversations);
-        const conversations = [];
+        const conversationsDuplicates = [];
 
-        allConversations.forEach(element => {
-            if (element._id != userID) {
-                conversations.push(element);
+        allConversations.map(element => {
+            if (element._id[0] !== userID) {
+                conversationsDuplicates.push(element._id[0]);
+            }
+            else {
+                if(!conversationsDuplicates.includes(element._id[1].toString()))
+                {
+                    conversationsDuplicates.push(element._id[1]);
+                }
             }
         })
+
         const ReceiverNames = [];
+
+        const conversations = [...new Set(conversationsDuplicates)];
+
         const promises = conversations.map(async (element) => {
-            const name = await UserModel.findById(element._id, ['username', 'profilePicture']);
+            const name = await UserModel.findById(element, ['username', 'profilePicture']);
             ReceiverNames.push(name);
         })
 
@@ -369,7 +380,7 @@ router.post('/getP2PChats', async (req, res) => {
 
 
 router.post('/fetchUser', async (req, res) => {
-    try {        
+    try {
         const User = await UserModel.findById(req.body.userID);
 
         return res.status(200).json({
@@ -386,7 +397,7 @@ router.post('/fetchUser', async (req, res) => {
 })
 
 router.post('/getUser', async (req, res) => {
-    try {        
+    try {
         const User = await UserModel.find({
             username: { $regex: req.body.userName, $options: 'i' }
         });
