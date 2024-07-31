@@ -45,7 +45,7 @@ router.post('/getLiveTask', async (req, res) => {
                     { channelID: req.body.channelID }
                 ]
             },
-            ['liveTask.name', 'liveTask._id', 'liveTask.subtask']
+            ['liveTask']
         );
 
         return res.status(200).json({
