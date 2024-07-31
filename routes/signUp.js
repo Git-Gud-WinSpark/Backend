@@ -33,7 +33,6 @@ router.post('/', async (req, res) => {
                     username: req.body.username,
                     email: req.body.email,
                     password: hashedPassword,
-                    communityIDs: "66a4d8d485a6cca8ee8bceca",
                     profilePicture: req.body.profilePicture,
                     lockUntil: null,
                     timestamp: new Date()
