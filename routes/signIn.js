@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const saltRounds = 10;
 const SECRET_KEY = "Git-Gud";
+const LOCK_TIME = 5 * 60 * 1000;
 
 function validateEmail(email) {
     // Regular expression pattern for email validationconst 
@@ -29,13 +30,14 @@ router.post('/', async (req, res) => {
                 const originalId = foundRecord._id.toHexString();
                 const oldfailAttemptCount = foundRecord.failAttemptCount;
 
-                if (oldfailAttemptCount >= 3) 
-                {
-                    return res.status(404).json({
-                        status: "Failed",
-                        message: "Too many attempts"
-                    })
-                }
+                // if (oldfailAttemptCount >= 3) {
+                //     user.lockUntil = Date.now() + LOCK_TIME;
+                //     foundRecord.failAttemptCount = 0;
+                //     return res.status(404).json({
+                //         status: "Failed",
+                //         message: "Your account is locked for 5 minutes"
+                //     })
+                // }
 
                 if (result) {
                     const token = await jwt.sign(originalId, SECRET_KEY);
