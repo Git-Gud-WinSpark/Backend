@@ -313,8 +313,7 @@ router.post('/listP2PConversations', async (req, res) => {
                 conversationsDuplicates.push(element._id[0]);
             }
             else {
-                if(!conversationsDuplicates.includes(element._id[1].toString()))
-                {
+                if (!conversationsDuplicates.includes(element._id[1].toString())) {
                     conversationsDuplicates.push(element._id[1]);
                 }
             }
@@ -364,7 +363,14 @@ router.post('/getP2PChats', async (req, res) => {
                 { $and: [{ senderID: userID }, { receiverID: req.body.receiverID }] },
                 { $and: [{ senderID: req.body.receiverID }, { receiverID: userID }] }
             ]
-        }).sort({ timestamp: 1 });;
+        }).sort({ timestamp: 1 });
+
+        const promises = chats.map(async(chat) => {
+            const token = await jwt.sign(chat.senderID, SECRET_KEY);
+            chat.senderID = token;
+        });
+
+        await Promise.all(promises);
 
         return res.status(200).json({
             status: "Success",

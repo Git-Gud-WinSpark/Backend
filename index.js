@@ -16,6 +16,7 @@ const addPreferenceRouter = require('./routes/addPreference');
 const progressRouter = require('./routes/progressTrack');
 const P2PChatModel = require('./model/P2PChatModel');
 const limiter = require('./controller/rateLimit');
+const decryptJWTToken = require('./controller/decryptToken')
 var io = require("socket.io")(server, {
     cors: {
         origin: "*"
@@ -33,7 +34,7 @@ var clients = {};
 
 async function storeP2CChats(userID, receiverID, communityID, message) {
     try {
-
+        
         await ChatModel.create({
             senderID: userID,
             receiverID: receiverID,
@@ -47,9 +48,9 @@ async function storeP2CChats(userID, receiverID, communityID, message) {
     }
 }
 
-async function storeP2PChats(userID, receiverID, message, communityID) {
+async function storeP2PChats(token, receiverID, message, communityID) {
     try {
-
+        const userID = await decryptJWTToken(token);
         await P2PChatModel.create({
             senderID: userID,
             receiverID: receiverID,
