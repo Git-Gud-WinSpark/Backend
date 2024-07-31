@@ -25,19 +25,23 @@ router.post('/', async (req, res) => {
                 })
             }
             else {
+                if (foundRecord.lockUntil > Date.now()) {
+                    return res.status(423).json({ message: 'Account locked. Try again later.' });
+                }
                 var result = await bcrypt.compare(req.body.password, foundRecord.password);
                 const preferences = foundRecord.preferences;
                 const originalId = foundRecord._id.toHexString();
                 const oldfailAttemptCount = foundRecord.failAttemptCount;
 
-                // if (oldfailAttemptCount >= 3) {
-                //     user.lockUntil = Date.now() + LOCK_TIME;
-                //     foundRecord.failAttemptCount = 0;
-                //     return res.status(404).json({
-                //         status: "Failed",
-                //         message: "Your account is locked for 5 minutes"
-                //     })
-                // }
+                if (oldfailAttemptCount >= 3) {
+                    foundRecord.lockUntil = Date.now() + LOCK_TIME;
+                    foundRecord.failAttemptCount = 0;
+                    await foundRecord.save();
+                    return res.status(404).json({
+                        status: "Failed",
+                        message: "Your account is locked for 5 minutes"
+                    })
+                }
 
                 if (result) {
                     const token = await jwt.sign(originalId, SECRET_KEY);

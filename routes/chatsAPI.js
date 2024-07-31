@@ -197,7 +197,7 @@ router.post('/addCommunity', async (req, res) => {
 
 router.get('/listAllCommunity', async (req, res) => {
     try {
-        const allCommunities = await Community.find({}, ['_id', 'communityName', 'tag']);
+        const allCommunities = await Community.find({}, ['_id', 'communityName', 'tag', 'profilePicture']);
         return res.status(200).json({
             status: "Success",
             ListofAllCommunities: allCommunities

@@ -34,7 +34,7 @@ var clients = {};
 
 async function storeP2CChats(userID, receiverID, communityID, message) {
     try {
-        
+
         await ChatModel.create({
             senderID: userID,
             receiverID: receiverID,
@@ -86,14 +86,16 @@ io.on("connection", (socket) => {
         socket.broadcast.emit("messagep2c", { message: msg.msg, id: msg.id, comm_id: msg.comm_id, channel_id: msg.channel_id });
     })
 
-    socket.on("messagep2p", (msg) => {
+    socket.on("messagep2p", async (msg) => {
         console.log(msg, "p2p message");
         let targetID = msg.targetID;
-        storeP2PChats(msg.id, msg.targetID, msg.msg);
-        if (clients[targetID]) {
-            clients[targetID].emit("messagep2p", msg);
+        const receiverToken = await jwt.sign(targetID, SECRET_KEY);
+        storeP2PChats(msg.id, targetID, msg.msg);
+        if (clients[receiverToken]) {
+            clients[receiverToken].emit("messagep2p", msg);
         }
     })
+
 
 });
 
