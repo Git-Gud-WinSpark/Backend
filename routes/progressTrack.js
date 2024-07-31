@@ -234,6 +234,7 @@ router.post('/setTime', async (req, res) => {
                 ]
             }
         );
+        
 
         result.liveTask.forEach(element => {
             if (element._id == req.body.liveTaskID) {
