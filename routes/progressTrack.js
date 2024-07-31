@@ -220,4 +220,44 @@ router.post('/setSubTask', async (req, res) => {
     }
 });
 
+router.post('/setTime', async (req, res) => {
+    try {
+        const userID = await decryptJWTToken(req.body.token);
+
+        const result = await ProgressModel.findOne(
+            {
+                $and: [
+                    { userID: userID },
+                    { communityID: req.body.communityID },
+                    { channelID: req.body.channelID },
+                    { 'liveTask._id': req.body.liveTaskID }
+                ]
+            }
+        );
+
+        result.liveTask.forEach(element => {
+            if (element._id == req.body.liveTaskID) {
+                element.subtask.forEach(subT=>{
+                    if(subT._id == req.body.subtaskID)
+                    {
+                        subT.timeSpent = req.body.timeSpent;
+                    }
+                })
+            }
+        });
+        
+        await result.save();
+
+        return res.status(200).json({
+            status: "Success"
+        })
+    }
+    catch (e) {
+        return res.status(500).json({
+            status: "failed",
+            message: e.message
+        })
+    }
+});
+
 module.exports = router;
