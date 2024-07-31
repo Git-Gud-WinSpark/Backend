@@ -199,8 +199,10 @@ router.post('/setSubTask', async (req, res) => {
 
         result.liveTask.forEach(element => {
             if (element._id == req.body.liveTaskID) {
-                element.subtask.push(req.body.subTask);
-                console.log(element.subtask);
+                req.body.subTask.forEach(subT=>{
+                    console.log(subT);
+                    element.subtask.push(req.body.subT);
+                })
             }
         });
         console.log(result.live)

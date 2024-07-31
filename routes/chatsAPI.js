@@ -261,6 +261,11 @@ router.post('/p2pChat', async (req, res) => {
             message: req.body.message
         });
 
+        await P2PChatModel.create({
+            senderID: req.body.receiverID,
+            receiverID: userID
+        });
+
         return res.status(200).json({
             status: "Success",
             message: "Chat saved"
@@ -298,7 +303,7 @@ router.post('/listP2PConversations', async (req, res) => {
             },
             { $group: { _id: "$senderID" } },
         ]);
-
+        // console.log(allConversations);
         const conversations = [];
 
         allConversations.forEach(element => {

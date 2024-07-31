@@ -34,7 +34,8 @@ const UserSchema = new mongoose.Schema(
         failAttemptCount: {
             type: Number,
             default: 0
-        }
+        },
+        lockUntil: { type: Date }
     }
 )
 
