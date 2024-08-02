@@ -166,12 +166,9 @@ router.post('/getChats', async (req, res) => {
        ]);
        const encryptedChats = newChats.map((chat) => {
         const senderID = chat.senderID.toString();
-        console.log(senderID);
         const token = jwt.sign(senderID,SECRET_KEY);
         return { ...chat, senderID: token };
       });
-    //    console.log(newChats,"---------");
-        // const senderName= await UserModel.find({_id});
         return res.status(200).json({
             status: "Success",
             chat: encryptedChats
@@ -333,7 +330,6 @@ router.post('/listP2PConversations', async (req, res) => {
                 },
             }
         ]);
-        // console.log(allConversations);
         const conversationsDuplicates = [];
 
         allConversations.map(element => {

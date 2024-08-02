@@ -76,8 +76,6 @@ router.post('/getSubtask', async (req, res) => {
             },
             ['liveTask']
         );
-
-        // console.log(LiveTaskList[0].liveTask);
         // LiveTaskArray
         var subtaskList = [];
 
@@ -205,7 +203,6 @@ router.post('/setSubTask', async (req, res) => {
                 })
             }
         });
-        console.log(result.live)
         await result.save();
 
         return res.status(200).json({
