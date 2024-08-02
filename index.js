@@ -17,6 +17,8 @@ const progressRouter = require('./routes/progressTrack');
 const P2PChatModel = require('./model/P2PChatModel');
 const limiter = require('./controller/rateLimit');
 const decryptJWTToken = require('./controller/decryptToken')
+const jwt = require('jsonwebtoken');
+const SECRET_KEY = "Git-Gud";
 var io = require("socket.io")(server, {
     cors: {
         origin: "*"
@@ -34,9 +36,9 @@ var clients = {};
 
 async function storeP2CChats(userID, receiverID, communityID, message) {
     try {
-
+        const uID = await decryptJWTToken(userID);
         await ChatModel.create({
-            senderID: userID,
+            senderID: uID,
             receiverID: receiverID,
             communityID: communityID,
             message: message
@@ -83,7 +85,7 @@ io.on("connection", (socket) => {
         //     clients[targetID].emit("messagep2p",msg);
         console.log("id:", msg.id)
         storeP2CChats(msg.id, msg.channel_id, msg.comm_id, msg.msg);
-        socket.broadcast.emit("messagep2c", { message: msg.msg, id: msg.id, comm_id: msg.comm_id, channel_id: msg.channel_id });
+        socket.broadcast.emit("messagep2c", { message: msg.msg, id: msg.id, comm_id: msg.comm_id, channel_id: msg.channel_id, name: msg.name});
     })
 
     socket.on("messagep2p", async (msg) => {

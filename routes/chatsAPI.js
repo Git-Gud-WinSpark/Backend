@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const SECRET_KEY = "Git-Gud";
 const UserModel = require('../model/UserModel');
 const P2PChatModel = require('../model/P2PChatModel');
+const decryptJWTToken = require('../controller/decryptToken');
 
 router.post('/createCommunity', async (req, res) => {
     var communityID;
@@ -143,11 +144,37 @@ router.post('/getChannels', async (req, res) => {
 
 router.post('/getChats', async (req, res) => {
     try {
-        const chats = await ChatModel.find({ receiverID: req.body.receiverID });
-
+        const chats = await ChatModel.find({ receiverID: req.body.receiverID }); // receiverID is channel id
+       const newChats=await ChatModel.aggregate([{
+        $match:{
+            receiverID: req.body.receiverID,
+        }
+    }, 
+    {
+        $addFields: {
+          senderID: { $toObjectId: "$senderID" }
+        }
+      },
+     {
+        $lookup: {
+          from: "users",
+          localField: "senderID",
+          foreignField: "_id",
+          as: "joinedData"
+        }
+      },
+       ]);
+       const encryptedChats = newChats.map((chat) => {
+        const senderID = chat.senderID.toString();
+        console.log(senderID);
+        const token = jwt.sign(senderID,SECRET_KEY);
+        return { ...chat, senderID: token };
+      });
+    //    console.log(newChats,"---------");
+        // const senderName= await UserModel.find({_id});
         return res.status(200).json({
             status: "Success",
-            chat: chats
+            chat: encryptedChats
         })
     }
     catch (e) {
@@ -183,7 +210,8 @@ router.post('/addCommunity', async (req, res) => {
         return res.status(200).json({
             status: "Success",
             CommunityName: community.communityName,
-            Channels: Channels
+            Channels: Channels,
+            profilePicture: community.profilePicture
         })
     }
     catch (e) {
@@ -388,7 +416,7 @@ router.post('/getP2PChats', async (req, res) => {
 
 router.post('/fetchUser', async (req, res) => {
     try {
-        const User = await UserModel.findById(req.body.userID);
+        const User = await UserModel.findById(await decryptJWTToken(req.body.userID));
 
         return res.status(200).json({
             status: "Success",

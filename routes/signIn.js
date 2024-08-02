@@ -17,7 +17,6 @@ router.post('/', async (req, res) => {
     try {
         if (validateEmail(req.body.email)) {
             const foundRecord = await UserModel.findOne({ 'email': req.body.email });
-
             if (!foundRecord) {
                 return res.status(404).json({
                     status: "Failed",
@@ -54,7 +53,8 @@ router.post('/', async (req, res) => {
                         status: "Success",
                         message: "SignIp Successful",
                         token: token,
-                        preferences: preferences
+                        preferences: preferences,
+                        username: foundRecord.username
                     })
                 }
                 else {
