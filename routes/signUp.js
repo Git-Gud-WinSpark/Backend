@@ -19,6 +19,11 @@ function validatePassword(password) {
 }
 
 router.post('/', async (req, res) => {
+    // async function listIndexes() {
+    //     await UserModel.collection.dropIndex('comminityIDs_1');
+    // }
+    
+    // listIndexes();
     try {
         if (validateEmail(req.body.email)) {
             if (validatePassword(req.body.password)) {
@@ -28,6 +33,8 @@ router.post('/', async (req, res) => {
                     username: req.body.username,
                     email: req.body.email,
                     password: hashedPassword,
+                    profilePicture: req.body.profilePicture,
+                    lockUntil: null,
                     timestamp: new Date()
                 });
 
@@ -62,3 +69,4 @@ router.post('/', async (req, res) => {
 });
 
 module.exports = router;
+

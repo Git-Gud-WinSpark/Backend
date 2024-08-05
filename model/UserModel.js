@@ -5,7 +5,8 @@ const UserSchema = new mongoose.Schema(
     {
         username: {
             type: String,
-            required: true
+            required: true,
+            unique: true
         },
         email: {
             type: String,
@@ -25,13 +26,16 @@ const UserSchema = new mongoose.Schema(
         preferences: {
             type: [String]
         },
-        comminityIDs:
-            [
-                {
-                    type: String,
-                    unique: true
-                }
-            ]
+        communityIDs: [
+            {
+                type: String
+            }
+        ],
+        failAttemptCount: {
+            type: Number,
+            default: 0
+        },
+        lockUntil: { type: Date }
     }
 )
 
