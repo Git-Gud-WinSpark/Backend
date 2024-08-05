@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is the backend for the Study-Co platform, a system designed to facilitate study groups, resource sharing, and progress tracking. The backend is built using Node.js and Express, with MongoDB as the database and Socket.IO for real-time communication.
+This is the backend for the Stud-Com platform, a system designed to facilitate study groups, resource sharing, and progress tracking. The backend is built using Node.js and Express, with MongoDB as the database and Socket.IO for real-time communication.
 
 ## Base URL
 
