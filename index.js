@@ -12,7 +12,6 @@ const ChatsRouter = require("./routes/chatsAPI");
 const addPreferenceRouter = require("./routes/addPreference");
 const progressRouter = require("./routes/progressTrack");
 const P2PChatModel = require("./model/P2PChatModel");
-const limiter = require("./controller/rateLimit");
 const decryptJWTToken = require("./controller/decryptToken");
 const jwt = require("jsonwebtoken");
 
@@ -93,7 +92,6 @@ io.on("connection", (socket) => {
 });
 
 //Middlewares
-app.use(limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(mongoSanitize());
