@@ -36,7 +36,7 @@ Most endpoints require a JWT token for authentication. This token should be incl
 4. Set up your environment variables (create a `.env` file)
 5. Start the server:
    ```
-   npm start
+   npm run dev
    ```
 
 ## API Documentation
