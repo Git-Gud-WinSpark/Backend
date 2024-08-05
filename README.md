@@ -1,4 +1,4 @@
-# Study-Co Platform Backend
+# Stud-Com Platform Backend
 
 ## Introduction
 
