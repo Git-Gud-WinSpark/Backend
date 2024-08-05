@@ -1,18 +1,12 @@
+require('dotenv').config();
 const express = require('express');
 const UserModel = require('../model/UserModel');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = "Git-Gud";
 
 router.post('/', async (req, res) => {
     try {
-        var userID;
-        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
-            if (err) {
-                throw Error('Token problem');
-            }
-            userID = payload;
-        });
+        var userID = await decryptJWTToken(req.body.token);
 
         await UserModel.findOneAndUpdate(
             { _id: userID }, // Filter

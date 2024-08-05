@@ -1,10 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const UserModel = require('../model/UserModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const saltRounds = 10;
-const SECRET_KEY = "Git-Gud";
 
 function validateEmail(email) {
     // Regular expression pattern for email validationconst 
@@ -19,11 +19,6 @@ function validatePassword(password) {
 }
 
 router.post('/', async (req, res) => {
-    // async function listIndexes() {
-    //     await UserModel.collection.dropIndex('comminityIDs_1');
-    // }
-    
-    // listIndexes();
     try {
         if (validateEmail(req.body.email)) {
             if (validatePassword(req.body.password)) {
@@ -39,7 +34,7 @@ router.post('/', async (req, res) => {
                 });
 
                 const originalId = userRecord._id.toHexString();
-                const token = await jwt.sign(originalId, SECRET_KEY);
+                const token = await jwt.sign(originalId, process.env.SECRET_KEY);
 
                 return res.status(200).json({
                     status: "Success",

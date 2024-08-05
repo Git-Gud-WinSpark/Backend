@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 var http = require("http");
 const cors = require("cors");
@@ -89,7 +90,7 @@ io.on("connection", (socket) => {
     socket.on("messagep2p", async (msg) => {
         console.log(msg, "p2p message");
         let targetID = msg.targetID;
-        const receiverToken = await jwt.sign(targetID, SECRET_KEY);
+        const receiverToken = await jwt.sign(targetID, process.env.SECRET_KEY);
         storeP2PChats(msg.id, targetID, msg.msg);
         if (clients[receiverToken]) {
             clients[receiverToken].emit("messagep2p", msg);

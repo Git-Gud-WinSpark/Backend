@@ -1,11 +1,12 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const Community = require('../model/CommunityModel'); // Adjust the path as needed
 const ChatModel = require('../model/ChatsModel');
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = "Git-Gud";
 const UserModel = require('../model/UserModel');
 const P2PChatModel = require('../model/P2PChatModel');
+const decryptJWTToken = require('../controller/decryptToken');
 
 router.post('/createCommunity', async (req, res) => {
     var communityID;
@@ -29,13 +30,7 @@ router.post('/createCommunity', async (req, res) => {
     }
 
     try {
-        var userID;
-        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
-            if (err) {
-                throw Error('Token problem');
-            }
-            userID = payload;
-        });
+        const userID = await decryptJWTToken(req.body.token);
         communityID = communityID.toHexString();
         await UserModel.findOneAndUpdate(
             { _id: userID }, // Filter
@@ -89,16 +84,7 @@ router.post('/createChannel', async (req, res) => {
 
 router.post('/chat', async (req, res) => {
     try {
-        var userID;
-        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
-            if (err) {
-                return res.status(404).json({
-                    status: "failed",
-                    message: err.message
-                })
-            }
-            userID = payload;
-        });
+        const userID = await decryptJWTToken(req.body.token);
 
         await ChatModel.create({
             senderID: userID,
@@ -161,13 +147,7 @@ router.post('/getChats', async (req, res) => {
 
 router.post('/addCommunity', async (req, res) => {
     try {
-        var userID;
-        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
-            if (err) {
-                throw Error('Token problem');
-            }
-            userID = payload;
-        });
+        const userID = await decryptJWTToken(req.body.token);
 
         await UserModel.findOneAndUpdate(
             { _id: userID }, // Filter
@@ -213,13 +193,7 @@ router.get('/listAllCommunity', async (req, res) => {
 
 router.post('/listUserCommunity', async (req, res) => {
     try {
-        var userID;
-        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
-            if (err) {
-                throw Error('Token problem');
-            }
-            userID = payload;
-        });
+        const userID = await decryptJWTToken(req.body.token);
         const userData = await UserModel.findById(userID);
         const userCommunities = [];
         const promises = userData.communityIDs.map(async (commID) => {
@@ -244,16 +218,7 @@ router.post('/listUserCommunity', async (req, res) => {
 
 router.post('/p2pChat', async (req, res) => {
     try {
-        var userID;
-        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
-            if (err) {
-                return res.status(404).json({
-                    status: "failed",
-                    message: err.message
-                })
-            }
-            userID = payload;
-        });
+        const userID = await decryptJWTToken(req.body.token);
 
         await P2PChatModel.create({
             senderID: userID,
@@ -277,16 +242,7 @@ router.post('/p2pChat', async (req, res) => {
 
 router.post('/listP2PConversations', async (req, res) => {
     try {
-        var userID;
-        await jwt.verify(req.body.token, SECRET_KEY, function (err, payload) {
-            if (err) {
-                return res.status(404).json({
-                    status: "failed",
-                    message: err.message
-                })
-            }
-            userID = payload;
-        });
+        const userID = await decryptJWTToken(req.body.token);
 
         const allConversations = await P2PChatModel.aggregate([
             {
@@ -348,7 +304,7 @@ router.post('/getP2PChats', async (req, res) => {
 
     var userID;
     try {
-        const payload = await jwt.verify(req.body.token, SECRET_KEY);
+        const userID = await decryptJWTToken(req.body.token);
         userID = payload;
     } catch (err) {
         return res.status(404).json({
@@ -365,8 +321,8 @@ router.post('/getP2PChats', async (req, res) => {
             ]
         }).sort({ timestamp: 1 });
 
-        const promises = chats.map(async(chat) => {
-            const token = await jwt.sign(chat.senderID, SECRET_KEY);
+        const promises = chats.map(async (chat) => {
+            const token = await jwt.sign(chat.senderID, process.env.SECRET_KEY);
             chat.senderID = token;
         });
 

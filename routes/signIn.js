@@ -1,10 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const UserModel = require('../model/UserModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const saltRounds = 10;
-const SECRET_KEY = "Git-Gud";
 const LOCK_TIME = 5 * 60 * 1000;
 
 function validateEmail(email) {
@@ -44,7 +44,7 @@ router.post('/', async (req, res) => {
                 }
 
                 if (result) {
-                    const token = await jwt.sign(originalId, SECRET_KEY);
+                    const token = await jwt.sign(originalId, process.env.SECRET_KEY);
                     await UserModel.findOneAndUpdate(
                         { _id: originalId }, // Filter
                         { $set: { failAttemptCount: 0 } }, // Update

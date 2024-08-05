@@ -1,10 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const UserModel = require('../model/UserModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const saltRounds = 10;
-const SECRET_KEY = "Git-Gud";
 const ProgressModel = require('../model/ProgressModel');
 const decryptJWTToken = require('../controller/decryptToken');
 
@@ -199,7 +199,7 @@ router.post('/setSubTask', async (req, res) => {
 
         result.liveTask.forEach(element => {
             if (element._id == req.body.liveTaskID) {
-                req.body.subTask.forEach(subT=>{
+                req.body.subTask.forEach(subT => {
                     console.log(subT);
                     element.subtask.push(req.body.subT);
                 })
@@ -234,19 +234,18 @@ router.post('/setTime', async (req, res) => {
                 ]
             }
         );
-        
+
 
         result.liveTask.forEach(element => {
             if (element._id == req.body.liveTaskID) {
-                element.subtask.forEach(subT=>{
-                    if(subT._id == req.body.subtaskID)
-                    {
+                element.subtask.forEach(subT => {
+                    if (subT._id == req.body.subtaskID) {
                         subT.timeSpent = req.body.timeSpent;
                     }
                 })
             }
         });
-        
+
         await result.save();
 
         return res.status(200).json({

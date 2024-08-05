@@ -1,10 +1,10 @@
+require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = "Git-Gud";
 
 async function decryptJWTToken(token)
 {
     var userID;
-    await jwt.verify(token, SECRET_KEY, function (err, payload) {
+    await jwt.verify(token, process.env.SECRET_KEY, function (err, payload) {
         if (err) {
             throw Error('Token problem');
         }
